@@ -160,6 +160,25 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/catagories', async (req, res) => {
+            const query = {};
+            const result = await catagoryCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        app.get(`/catagory/:catagory`, async (req, res) => {
+            const catagory = req.params.catagory;
+            const result = await productsCollection.find({}).toArray();
+            const filterData = result.filter(p => p.catagory === catagory)
+            if (filterData) {
+                res.send({
+                    success: true,
+                    data: filterData
+                })
+            }
+
+        })
+
 
         app.get('/', (req, res) => {
             res.send('Server Running')
