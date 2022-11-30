@@ -253,11 +253,68 @@ async function run() {
             res.send(result);
         });
 
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const booking = req.body;
+            console.log(booking);
+            const resalePrice = booking.price;
 
-        app.get('/', (req, res) => {
-            res.send('Server Running')
-        })
+            const amount = parseInt(resalePrice) * 100;
+            console.log(typeof (amount), amount)
+            if (amount) {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    currency: 'usd',
+                    amount: amount,
+                    "payment_method_types": [
+                        "card"
+                    ]
+                });
+                res.send({
+                    clientSecret: paymentIntent.client_secret,
+                });
 
-        app.listen(port, () => {
-            console.log(`Server Loading on port: ${port}`);
-        })
+            }
+            else {
+                return
+            }
+        });
+
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            console.log(payment)
+            const result = await paymentsCollection.insertOne(payment);
+            const id = payment.bookingId
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await ordersCollection.updateOne(filter, updatedDoc)
+            res.send(result);
+        });
+
+
+        app.get('/orders/payment/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await ordersCollection.find({ _id: ObjectId(id) }).toArray();
+            res.send(result);
+        });
+
+
+
+    }
+    finally {
+
+    }
+}
+run().catch(console.log);
+
+
+app.get('/', (req, res) => {
+    res.send('Server Running')
+})
+
+app.listen(port, () => {
+    console.log(`Server Loading on port: ${port}`);
+})
