@@ -222,6 +222,24 @@ async function run() {
             }
         });
 
+        app.post('/report-items', verifyJWT, async (req, res) => {
+            const product = req.body;
+            const result = await reportsCollection.insertOne(product);
+            res.send(result);
+        });
+
+        app.get('/reports', async (req, res) => {
+            const product = req.body;
+            const result = await reportsCollection.find(product).toArray();
+            res.send(result);
+        });
+
+        app.delete('/reported-products/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await reportsCollection.deleteOne(filter);
+            res.send(result);
+        });
 
 
         app.get('/', (req, res) => {
