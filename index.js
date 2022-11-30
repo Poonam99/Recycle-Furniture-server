@@ -199,6 +199,30 @@ async function run() {
             res.send(result);
         });
 
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        };
+
+        app.get('/veryfied/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
+            const result = await usersCollection.findOne({ email: email });
+            if (result?.status === 'Veryfied') {
+                res.send(result);
+            }
+            else {
+                return;
+            }
+        });
+
+
 
         app.get('/', (req, res) => {
             res.send('Server Running')
