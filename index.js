@@ -135,6 +135,32 @@ async function run() {
         });
 
 
+        app.post('/products', verifyJWT, async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result);
+        });
+
+        app.get('/products/:email', async (req, res) => {
+            const email = req.params.email
+            const query = await productsCollection.find({}).toArray();
+            const filterData = query.filter(p => p.sellerEmail === email)
+            if (filterData) {
+                res.send({
+                    success: true,
+                    data: filterData
+                })
+            }
+        })
+
+        app.delete('/products/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+
         app.get('/', (req, res) => {
             res.send('Server Running')
         })
