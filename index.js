@@ -179,6 +179,26 @@ async function run() {
 
         })
 
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        })
+
+        app.get('/orders/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const result = await ordersCollection.find().toArray();
+            const filterData = result.filter(p => p.email === email);
+            res.send(filterData);
+        });
+
+        app.delete('/orders/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(filter);
+            res.send(result);
+        });
+
 
         app.get('/', (req, res) => {
             res.send('Server Running')
