@@ -241,6 +241,18 @@ async function run() {
             res.send(result);
         });
 
+        app.post('/advertisements', verifyJWT, async (req, res) => {
+            const ad = req.body;
+            const result = await advertisementsCollection.insertOne(ad);
+            res.send(result);
+        });
+
+        app.get('/advertisements', async (req, res) => {
+            const query = {};
+            const result = await advertisementsCollection.find(query).sort({ _id: -1 }).toArray();
+            res.send(result);
+        });
+
 
         app.get('/', (req, res) => {
             res.send('Server Running')
