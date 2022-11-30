@@ -34,12 +34,33 @@ function verifyJWT(req, res, next) {
 
 }
 
+async function run() {
+    try {
+        const usersCollection = client.db('recycleferniture').collection('users');
+        const productsCollection = client.db('recycleferniture').collection('products');
+        const catagoryCollection = client.db('recycleferniture').collection('catagories');
+        const ordersCollection = client.db('recycleferniture').collection('orders');
+        const advertisementsCollection = client.db('recycleferniture').collection('advertisements');
+        const paymentsCollection = client.db('recycleferniture').collection('payments');
+        const reportsCollection = client.db('recycleferniture').collection('reports');
+
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '10h' })
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' })
+        });
 
 
-app.get('/', (req, res) => {
-    res.send('Server Running')
-})
 
-app.listen(port, () => {
-    console.log(`Server Loading on port: ${port}`);
-})
+        app.get('/', (req, res) => {
+            res.send('Server Running')
+        })
+
+        app.listen(port, () => {
+            console.log(`Server Loading on port: ${port}`);
+        })
